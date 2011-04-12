@@ -88,6 +88,8 @@
 #define USB_PRODUCT_ID_RNDIS_ADB        0x70AF
 #define USB_VENDOR_ID                   0x22b8
 
+#define STINGRAY_EXT_SDCARD_DETECT	TEGRA_GPIO_PI5
+
 struct tag_tegra {
 	__u32 bootarg_key;
 	__u32 bootarg_len;
@@ -573,6 +575,14 @@ static struct tegra_sdhci_platform_data stingray_sdhci_platform_data4 = {
 	.power_gpio = TEGRA_GPIO_PI6,
 };
 
+static struct tegra_sdhci_platform_data stingray_sdhci_platform_data2 = {
+	.clk_id = NULL,
+	.force_hs = 0,
+	.cd_gpio = STINGRAY_EXT_SDCARD_DETECT,
+	.wp_gpio = -1,
+	.power_gpio = -1,
+};
+
 static struct tegra_i2c_platform_data stingray_i2c1_platform_data = {
 	.adapter_nr   = 0,
 	.bus_count    = 1,
@@ -631,10 +641,16 @@ static void stingray_sdhci_init(void)
 {
 	/* TODO: setup GPIOs for cd, wd, and power */
 	tegra_sdhci_device2.dev.platform_data = &stingray_wifi_data;
+	tegra_sdhci_device3.dev.platform_data = &stingray_sdhci_platform_data2;
 	tegra_sdhci_device4.dev.platform_data = &stingray_sdhci_platform_data4;
 
+
 	platform_device_register(&tegra_sdhci_device2);
+	platform_device_register(&tegra_sdhci_device3);
 	platform_device_register(&tegra_sdhci_device4);
+
+	tegra_gpio_enable(STINGRAY_EXT_SDCARD_DETECT);
+	gpio_direction_input(STINGRAY_EXT_SDCARD_DETECT);
 }
 #define ATAG_BDADDR 0x43294329	/* stingray bluetooth address tag */
 #define ATAG_BDADDR_SIZE 4
